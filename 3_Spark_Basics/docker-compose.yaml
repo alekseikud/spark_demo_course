@@ -1,0 +1,41 @@
+
+services:
+  master:
+    image: bitnami/spark:3.5.1
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=0.0.0.0
+      - SPARK_MASTER_PORT=7077
+      - SPARK_EVENTLOG_ENABLED=true
+      - SPARK_EVENTLOG_DIR=/tmp/spark-events
+    volumes:
+      - /Users/alex/Desktop/PY_internship/spark_demo_course/3_Spark_Basics:/workspace
+    ports:
+      - "8080:8080"   # Master UI
+      - "7077:7077"   # RPC
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker1:
+    image: bitnami/spark:3.5.1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+    depends_on:
+      - master
+
+  worker2:
+    image: bitnami/spark:3.5.1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+    depends_on:
+      - master
